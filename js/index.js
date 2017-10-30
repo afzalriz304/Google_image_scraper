@@ -18,31 +18,31 @@ $scope.orderByField = 'restaurant.name';
         "method":"POST",
         "params":params
       }).then(function (response) {
-        console.log(response.data)
-        if(response.data.length>0){
+        console.log(response.data.data)
+        if(response.data.data.length>0){
          $("#tablePreloader").hide();
-         $scope.imageResults  = response.data;
+         $scope.imageResults  = response.data.data;
         }
-        /*$("#tablePreloader").hide();
-        $scope.resturantList=response.data.nearby_restaurants;
-        $scope.city=response.data.location.city_name+","+response.data.location.country_name*/
       })
     }
 
   }
 
-  $scope.getRestaurantDetails=function(res_id) {
-    console.log(res_id);
-    var params={res_id:res_id}
+  $scope.getSearchData=function() {
     $("#modalPreloader").show();
     $http({
-      "url":"",
-      "method":"POST",
-      "params":params
+      "url":"http://localhost:8081/getSearchData",
+      "method":"GET",
     }).then(function (response) {
       console.log(response.data)
       $("#modalPreloader").hide();
-      $scope.restaurant=response.data;
+      $scope.history=response.data;
     })
+  }
+
+  $scope.showSearchData = function(history){
+    $scope.historyData  = history.data;
+    $('#modal1').modal('open');
+    console.log($scope.historyData);
   }
 });

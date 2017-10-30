@@ -1,6 +1,25 @@
 var express=require('express');
 var bodyParser = require('body-parser');
 var app=express();
+var fs = require('fs');
+
+
+
+//connected to mongoose
+var mongoose  = require('mongoose');
+mongoose.connect("mongodb://localhost:27017/googleSearch")
+require('./models/SearchedData')
+
+mongoose.connection.on("connected",function(){
+  console.log('connection Successfull')
+})
+mongoose.connection.on("error",function(err){
+  if(err)
+    console.log('connection error')
+})
+
+var searchedData  = mongoose.model('searchedData');
+
 
 //image-scraper
 var Scraper = require ('images-scraper')
@@ -29,73 +48,38 @@ app.post('/getImages',urlencodedParser,function(req,res){
     num: 15
   })
   .then(function (data) {
-      console.log('first 15 results from google', data);
-      res.send(data);
+
+    var searchData  = {
+      key:req.query.image,
+      data:data
+    }
+
+    var now = new Date();
+    var search  = searchedData({
+      'keyword':req.query.image,
+      'data':data,
+      'time':now
+    })
+
+    search.save(function(err,search_data){
+      res.send(search_data);
+    })
+
+    
   }).catch(function(err) {
       console.log('err', err);
   });
 })
 
+app.get('/getSearchData',function(req,res){
+  searchedData.find({}).exec(function(err,db_data){
+    if(err){
 
-/*app.post('/sendOTP',urlencodedParser,function(req,res){
-
-	console.log("here")
-	console.log(req.query.phone);
-  var number=req.query.phone;
-		var accountSid = 'ACc59c5ce7c0fde3443cd48ec26382cc06'; // Your Account SID from www.twilio.com/console
-		var authToken = 'b4de6998b437c94503401257472f4fa9';   // Your Auth Token from www.twilio.com/console
-
-		var client = new twilio(accountSid, authToken);
-
-		client.messages.create({
-			body: "Your OTP Is "+req.query.OTP,
-			to: number,  // Text this number
-			from: '+19286123844' // From a valid Twilio number
-		})
-		.then((message) => console.log(message.sid));
-  req.query.OTP=req.query.OTP
-  var date=new Date();
-  req.query.time=date;
-
-  fs.readFile('../contacts.txt','utf8',function(err,content){
-    var parseJson = JSON.parse(content);
-    var newFile=[];
-    console.log(err);
-    console.log(parseJson.length);
-    parseJson.forEach(function (data) {
-      if(data.phone==req.query.phone){
-        data=req.query;
-      }
-      newFile.push(data);
-    })
-    console.log(newFile);
-    fs.writeFile('../contacts.txt',JSON.stringify(newFile),function(err){})
+    }else{
+      res.send(db_data);
+    }
   })
-	res.send(req.query);
 })
-
-
-////
-app.post('/AddJSONData',urlencodedParser,function(req,res){
-
-	console.log(req.query);
-  var obj={"OTP":"------","name":req.query.name,"phone":"+91"+req.query.phone,"time":"Not Sent"}
-
-
-  fs.readFile('../contacts.txt','utf8',function(err,content){
-    var parseJson = JSON.parse(content);
-    var newFile=[];
-    newFile.push(obj);
-    parseJson.forEach(function (data) {
-      newFile.push(data);
-    })
-    console.log(newFile);
-    fs.writeFile('../contacts.txt',JSON.stringify(newFile),function(err){
-
-    })
-  })
-	res.send('success');
-})*/
 
 
 var server = app.listen(8081, function () {
