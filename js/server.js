@@ -7,7 +7,7 @@ var fs = require('fs');
 
 //connected to mongoose
 var mongoose  = require('mongoose');
-mongoose.connect("mongodb://localhost:27017/googleSearch")
+mongoose.connect("mongodb://root:root@ds141185.mlab.com:41185/googlesearch")
 require('./models/SearchedData')
 
 mongoose.connection.on("connected",function(){
