@@ -6,6 +6,7 @@ $scope.orderByField = 'restaurant.name';
   $scope.reverseSort = false;
 
     $scope.getImages=function(image){
+    $scope.imageResults=[];
     console.log(image);
     if(image==undefined){
       alert('Enter City name')
